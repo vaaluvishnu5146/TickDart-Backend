@@ -1,6 +1,14 @@
 const { default: mongoose } = require("mongoose");
 const CartModel = require("../Models/Cart.model");
 
+function computeCartPrice(data = {}) {
+  let value = 0;
+  for (let i = 0; i < data.products.length; i++) {
+    value += data.products[i].quantity * data.products[i].product.actualCost;
+  }
+  return value;
+}
+
 function getAllCart(req, res, next) {
   const page = req.query.page || 1;
   const limit = 5;
@@ -40,10 +48,24 @@ function getAllCart(req, res, next) {
 async function getCartById(req, res, next) {
   try {
     if (!req.params.id) throw new Error("User Id is missing");
-    const response = await CartModel.find({ _id: req.params.id }).populate(
-      "userId"
-    );
-    if (response.length > 0) {
+    const response = await CartModel.findById({ _id: req.params.id })
+      // .populate({
+      //   path: "userId",
+      //   model: "user",
+      //   select: ["name", "email"],
+      // })
+      .populate({
+        path: "products.product",
+        model: "products",
+        select: {
+          _id: 0,
+          actualCost: 1,
+          image: 1,
+          name: 1,
+        },
+      });
+    response["cartValue"] = computeCartPrice(response);
+    if (response && response._id) {
       res.status(200).json({
         message: "Cart fetched successfully",
         success: true,
@@ -52,7 +74,7 @@ async function getCartById(req, res, next) {
     } else {
       res.status(200).json({
         message: "No Cart item found",
-        data: [],
+        data: {},
         success: true,
       });
     }
@@ -73,6 +95,7 @@ async function createCart(req, res, next) {
       res.status(200).json({
         success: true,
         message: "Cart created successfully",
+        cart: response,
       });
     } else {
       res.status(500).json({
@@ -99,6 +122,7 @@ async function updateCart(req, res, next) {
       res.status(200).json({
         success: true,
         message: "Cart updated successfully",
+        cart: response,
       });
     } else {
       return res.status(500).json({

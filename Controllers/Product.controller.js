@@ -2,7 +2,7 @@ const ProductsModel = require("../Models/Product.model");
 
 function getAllProducts(req, res, next) {
   const page = req.query.page || 1;
-  const limit = 5;
+  const limit = req.query.limit || 5;
   const skip = page === 1 ? 0 : (page - 1) * limit;
 
   ProductsModel.find()

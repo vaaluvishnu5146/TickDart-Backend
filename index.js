@@ -8,7 +8,7 @@ const PORT = 4000;
 
 initiateDBConnection();
 
-var whitelist = ["http://127.0.0.1:5500", undefined];
+var whitelist = ["http://127.0.0.1:5500", undefined, "http://localhost:5173"];
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {

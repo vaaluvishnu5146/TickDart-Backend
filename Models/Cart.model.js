@@ -7,23 +7,21 @@ const CartSchema = mongoose.Schema(
       ref: "user",
       required: true,
     },
-    products: {
-      type: Array,
-      required: true,
-      validate: [(val) => val.length <= 0, "Must have minimum one product"],
-    },
-    products: {
-      type: [
-        {
-          productId: { type: String, ref: "product" },
-          quantity: Number,
-        },
-      ],
-      validate: [arrayLimit, "{PATH} should have atleast one item"],
-    },
+    // products: {
+    //   type: Array,
+    //   required: true,
+    //   validate: [(val) => val.length <= 0, "Must have minimum one product"],
+    // },
+    products: [
+      {
+        product: { type: mongoose.Schema.Types.ObjectId, ref: "products" },
+        quantity: Number,
+      },
+    ],
     couponCode: {
       type: String,
       required: false,
+      validate: [couponValidator, "Error coupon"],
     },
     cartValue: {
       type: Number,
@@ -35,6 +33,10 @@ const CartSchema = mongoose.Schema(
 
 function arrayLimit(val) {
   return val.length != 0;
+}
+
+function couponValidator() {
+  return true;
 }
 
 const CartModel = mongoose.model("cart", CartSchema);
